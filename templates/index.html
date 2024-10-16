@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}ホーム{% endblock %}
+
+{% block extra_head %}
+<style>
+    #calendar {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    #eventModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        #calendar {
+            font-size: 0.8em;
+        }
+        .modal-content {
+            width: 95%;
+            margin: 5% auto;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #calendar {
+            font-size: 0.7em;
+        }
+        .modal-content {
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
+        }
+    }
+
+    #eventForm, #participantSection {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #eventForm input, #eventForm select, #participantSection select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    #eventForm button, #participantSection button {
+        align-self: flex-start;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>イベントカレンダー</h1>
+<div id='calendar'></div>
+
+<div id="eventModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">イベントの追加/編集</h2>
+        <form id="eventForm">
+            <input type="hidden" id="eventId">
+            <label for="eventTitle">タイトル:</label>
+            <input type="text" id="eventTitle" required><br><br>
+            <label for="eventStart">開始日時:</label>
+            <input type="datetime-local" id="eventStart" required><br><br>
+            <label for="eventEnd">終了日時:</label>
+            <input type="datetime-local" id="eventEnd" required><br><br>
+            <label for="eventLocation">場所:</label>
+            <input type="text" id="eventLocation"><br><br>
+            <label for="eventColor">色:</label>
+            <input type="color" id="eventColor" value="#3788d8"><br><br>
+            <button type="submit">保存</button>
+        </form>
+        <div id="participantSection">
+            <h3>参加状況</h3>
+            <p>参加者数: <span id="participantCount">0</span></p>
+            <select id="participantStatus">
+                <option  value="参加">参加</option>
+                <option value="不参加">不参加</option>
+                <option value="未定">未定</option>
+            </select>
+            <button id="updateParticipation">更新</button>
+            <ul id="participantList"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: '/events',
+        editable: {% if current_user.is_admin %}true{% else %}false{% endif %},
+        selectable: {% if current_user.is_admin %}true{% else %}false{% endif %},
+        select: function(info) {
+            {% if current_user.is_admin %}
+            openModal(null, info.start, info.end);
+            {% endif %}
+        },
+        eventClick: function(info) {
+            openModal(info.event);
+        },
+        eventDrop: function(info) {
+            {% if current_user.is_admin %}
+            updateEvent(info.event);
+            {% else %}
+            info.revert();
+            {% endif %}
+        },
+        eventResize: function(info) {
+            {% if current_user.is_admin %}
+            updateEvent(info.event);
+            {% else %}
+            info.revert();
+            {% endif %}
+        },
+        eventContent: function(arg) {
+        let arrayOfDomNodes = []
+        let titleEvent = document.createElement('div')
+        let startTime = arg.event.start.getHours();
+        let endTime = arg.event.end.getHours();
+        let startMinutes = arg.event.start.getMinutes();
+        let endMinutes = arg.event.end.getMinutes();
+        let startMeridiem = startTime >= 12 ? 'pm' : 'am';
+        let endMeridiem = endTime >= 12 ? 'pm' : 'am';
+        if(arg.event.extendedProps.participants_count) {
+            titleEvent.innerHTML = `${arg.event.title} (${arg.event.extendedProps.participants_count})<br>${startTime}-${endTime}${startMeridiem}`;
+        } else {
+            titleEvent.innerHTML = `${arg.event.title}<br>${startTime}-${endTime}${startMeridiem}`;
+        }
+        arrayOfDomNodes.push(titleEvent)
+        return { domNodes: arrayOfDomNodes }
+        },
+    
+        windowResize: function(view) {
+            if (window.innerWidth < 768) {
+                calendar.changeView('listWeek');
+            } else {
+                calendar.changeView('dayGridMonth');
+            }
+        },
+    });
+    calendar.render();
+
+    var modal = document.getElementById("eventModal");
+    var span = document.getElementsByClassName("close")[0];
+    var form = document.getElementById("eventForm");
+    var updateParticipationButton = document.getElementById("updateParticipation");
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        var eventData = {
+            title: document.getElementById("eventTitle").value,
+            start: document.getElementById("eventStart").value,
+            end: document.getElementById("eventEnd").value,
+            location: document.getElementById("eventLocation").value,
+            color: document.getElementById("eventColor").value
+        };
+        var eventId = document.getElementById("eventId").value;
+        if (eventId) {
+            eventData.id = eventId;
+        }
+        axios.post('/event', eventData)
+            .then(function (response) {
+                calendar.refetchEvents();
+                modal.style.display = "none";
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                alert('イベントの保存に失敗しました。');
+            });
+    }
+
+    updateParticipationButton.onclick = function() {
+        var eventId = document.getElementById("eventId").value;
+        var status = document.getElementById("participantStatus").value;
+        axios.post(`/event/${eventId}/participants`, { status: status })
+            .then(function (response) {
+                fetchParticipants(eventId);
+                calendar.refetchEvents();
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                alert('参加状況の更新に失敗しました。');
+            });
+    }
+
+    function openModal(event) {
+        document.getElementById("modalTitle").textContent = event ? "イベントの詳細" : "イベントの追加";
+        document.getElementById("eventId").value = event ? event.id : '';
+        document.getElementById("eventTitle").value = event ? event.title : '';
+        document.getElementById("eventStart").value = event ? event.start.toISOString().slice(0, 16) : '';
+        document.getElementById("eventEnd").value = event ? event.end.toISOString().slice(0, 16) : '';
+        document.getElementById("eventLocation").value = event ? event.extendedProps.location || '' : '';
+        document.getElementById("eventColor").value = event ? event.backgroundColor : '#3788d8';
+        
+        var participantSection = document.getElementById("participantSection");
+        var eventForm = document.getElementById("eventForm");
+        
+        if (event) {
+            participantSection.style.display = "block";
+            fetchParticipants(event.id);
+            {% if current_user.is_admin %}
+            eventForm.style.display = "block";
+            {% else %}
+            eventForm.style.display = "none";
+            {% endif %}
+        } else {
+            participantSection.style.display = "none";
+            eventForm.style.display = "block";
+        }
+        
+        modal.style.display = "block";
+    }
+
+    function updateEvent(event) {
+        var eventData = {
+            id: event.id,
+            title: event.title,
+            start: event.start.toISOString(),
+            end: event.end.toISOString(),
+            location: event.extendedProps.location,
+            color: event.backgroundColor
+        };
+        axios.post('/event', eventData)
+            .catch(function (error) {
+                console.error('Error:', error);
+                calendar.refetchEvents();
+            });
+    }
+
+    function fetchParticipants(eventId) {
+        axios.get(`/event/${eventId}/participants`)
+            .then(function (response) {
+                var participantList = document.getElementById("participantList");
+                participantList.innerHTML = '';
+                var participantCount = 0;
+                response.data.forEach(function(participant) {
+                    var li = document.createElement("li");
+                    li.textContent = `${participant.username} (${participant.status})`;
+                    if (participant.user_id == {{ current_user.id }}) {
+                        var deleteButton = document.createElement("button");
+                        deleteButton.textContent = "削除";
+                        deleteButton.onclick = function() {
+                            deleteParticipant(eventId, participant.id);
+                        };
+                        li.appendChild(deleteButton);
+                    }
+                    participantList.appendChild(li);
+                    if (participant.status === '参加') {
+                        participantCount++;
+                    }
+                });
+                document.getElementById("participantCount").textContent = participantCount;
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+            });
+    }
+
+    function deleteParticipant(eventId, participantId) {
+        axios.delete(`/event/${eventId}/participant/${participantId}`)
+            .then(function (response) {
+                fetchParticipants(eventId);
+                calendar.refetchEvents();
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                alert('参加情報の削除に失敗しました。');
+            });
+    }
+});
+</script>
+{% endblock %}

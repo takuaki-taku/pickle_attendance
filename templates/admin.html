@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}管理者ページ{% endblock %}
+
+{% block content %}
+<h1>管理者ページ</h1>
+<h2>ユーザー管理</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ユーザー名</th>
+            <th>管理者権限</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ "はい" if user.is_admin else "いいえ" }}</td>
+            <td>
+                <form action="{{ url_for('toggle_admin', user_id=user.id) }}" method="post">
+                    <button type="submit">
+                        {% if user.is_admin %}
+                            管理者権限を削除
+                        {% else %}
+                            管理者権限を付与
+                        {% endif %}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
