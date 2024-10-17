@@ -101,7 +101,7 @@
     }
     #eventForm button, #participantSection button {
         align-self: flex-start;
-        background-color: #3788d8;
+        background-color: #88ace1;
         color: white;
         border: none;
         padding: 10px 15px;
@@ -144,13 +144,13 @@
     }
 
     .participation-btn {
-            background-color: #3788d8; /* 押された時の色 */
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px; /* ボタン間に少しスペース */
+        background-color: #3788d8; /* 押された時の色 */
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px; /* ボタン間に少しスペース */
         }
 
         .participation-btn:not(.active) { /* 押されていないボタン */
@@ -163,9 +163,9 @@
             background-color: #2c6aa0; /* ホバー時の色 */
         }
 
-        .participation-btn.active {
-            background-color: #3788d8; /* 選択されている時の色 */
-            color: white;
+        .participation-btn.active { /* 押されたボタン */
+        background-color: #2c6aa0; /* ホバーの色 */
+        border: none; /* 枠線なし */
         }
 
         #attendingList, #decliningList, #undecidedList {
@@ -225,6 +225,7 @@
                 <input type="date" id="repeatUntil">
             </div>
             <button type="submit">保存</button>
+            <button type="button" id="deleteEventButton">削除</button>
         </form>
        
         <div id="participantSection">
@@ -492,32 +493,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.querySelectorAll('.participation-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            var eventId = document.getElementById("eventId").value;
-            var status = this.dataset.status;
-            updateParticipation(eventId, status);
+            button.addEventListener('click', function() {
+                var eventId = document.getElementById("eventId").value;
+                var status = this.dataset.status;
+                updateParticipation(eventId, status);
 
-            // 他のボタンの active クラスを削除
-            document.querySelectorAll('.participation-btn').forEach(btn => {
-                btn.classList.remove('active');
+                // 他のボタンの active クラスを削除
+                document.querySelectorAll('.participation-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // クリックしたボタンに active クラスを追加
+                this.classList.add('active');
             });
-
-            // クリックしたボタンに active クラスを追加
-            this.classList.add('active');
         });
-    });
 
-    function updateParticipation(eventId, status) {
-        axios.post(`/event/${eventId}/participants`, { status: status })
-            .then(function (response) {
-                fetchParticipants(eventId);
-                calendar.refetchEvents();
-            })
-            .catch(function (error) {
-                console.error('Error:', error);
-                alert('参加状況の更新に失敗しました。');
-            });
-    }
+        function updateParticipation(eventId, status) {
+            axios.post(`/event/${eventId}/participants`, { status: status })
+                .then(function (response) {
+                    fetchParticipants(eventId);
+                    calendar.refetchEvents();
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                    alert('参加状況の更新に失敗しました。');
+                });
+        }
 
     function showEventDetails(event) {
         document.getElementById("detailTitle").textContent = event.title;
@@ -526,5 +527,30 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("detailLocation").textContent = event.extendedProps.location || '未設定';
     }
 });
+
+// イベント削除機能
+function deleteEvent(eventId) {
+        axios.delete(`/event/${eventId}/delete`)
+            .then(function (response) {
+                calendar.refetchEvents();
+                modal.style.display = "none";
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                alert('イベントの削除に失敗しました。');
+            });
+    }
+
+    // イベント削除ボタンの追加
+if (event) {
+        // 削除ボタンを表示
+        document.getElementById("deleteEventButton").style.display = "block";
+
+        // 削除ボタンにイベントリスナーを追加
+        document.getElementById("deleteEventButton").addEventListener('click', function() {
+            deleteEvent(event.id);
+        });
+    }
+
 </script>
 {% endblock %}

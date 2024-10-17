@@ -287,6 +287,22 @@ def delete_participant(id, participant_id):
     )
 
 
+@app.route("/event/<int:id>/delete", methods=["DELETE"])
+@login_required
+@admin_required
+def delete_event(id):
+    event = Event.query.get(id)
+    if event:
+        # イベントに関連付けられた参加者を削除
+        for participant in event.participants:
+            db.session.delete(participant)
+        # イベントを削除
+        db.session.delete(event)
+        db.session.commit()
+        return "", 204
+    return jsonify({"error": "Event not found"}), 404
+
+
 @app.route("/admin")
 @login_required
 @admin_required
