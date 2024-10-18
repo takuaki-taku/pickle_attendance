@@ -13,7 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 環境変数を設定
-ENV SECRET_KEY=your_secret_key  # 実際の秘密鍵に置き換えてください
+ENV SECRET_KEY=your_secret_key  
+#実際の秘密鍵に置き換えてください
 ENV CYTHON_INSTALL=true
 
 # gunicorn を使用してアプリケーションを実行

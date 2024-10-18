@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,9 +16,8 @@ from functools import wraps
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///events.db"
-app.config["SECRET_KEY"] = (
-    "your_secret_key"  # 本番環境では安全な秘密鍵を使用してください
-)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "fallback_secret_key"
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)  # Migrate オブジェクトを作成
 login_manager = LoginManager(app)
@@ -27,7 +27,6 @@ login_manager.login_view = "login"
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # email = db.Column(db.String(120), unique=True, nullable=False)  # この行を削除
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
 
