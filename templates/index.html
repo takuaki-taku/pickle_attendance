@@ -213,20 +213,11 @@
                 <option value="#ffc107">Yellow</option>
                 <option value="#6f42c1">purple</option>
             </select>
-            <label for="eventRepeat">繰り返し:</label>
-            <select id="eventRepeat">
-                <option value="none">繰り返しなし</option>
-                <option value="daily">毎日</option>
-                <option value="weekly">毎週</option>
-                <option value="monthly">毎月</option>
-            </select>
-            <div id="repeatOptions" style="display: none;">
-                <label for="repeatUntil">繰り返し終了日:</label>
-                <input type="date" id="repeatUntil">
-            </div>
             <button type="submit">保存</button>
-            <button type="button" id="deleteEventButton">削除</button>
+            <button id="deleteEventButton">削除</button>
+        
         </form>
+    
        
         <div id="participantSection">
             <h3>参加状況</h3>
@@ -346,10 +337,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.getElementById('eventRepeat').addEventListener('change', function() {
-        var repeatOptions = document.getElementById('repeatOptions');
-        repeatOptions.style.display = this.value !== 'none' ? 'block' : 'none';
-    });
+            // イベント削除機能
+    function deleteEvent(eventId) {
+        axios.delete(`/event/${eventId}/delete`)
+            .then(function (response) {
+                calendar.refetchEvents();
+                modal.style.display = "none";
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                alert('イベントの削除に失敗しました。');
+            });
+    }
+        
+
 
     form.onsubmit = function(e) {
         e.preventDefault();
@@ -359,8 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
             end: document.getElementById("eventEnd").value,
             location: document.getElementById("eventLocation").value,
             color: document.getElementById("eventColor").value,
-            repeat: document.getElementById("eventRepeat").value,
-            repeatUntil: document.getElementById("repeatUntil").value
         };
         var eventId = document.getElementById("eventId").value;
         if (eventId) {
@@ -378,6 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+
     function openModal(event) {
         document.getElementById("modalTitle").textContent = event ? "イベントの詳細" : "イベントの追加";
         document.getElementById("eventId").value = event ? event.id : '';
@@ -386,16 +386,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("eventEnd").value = event ? event.end.toISOString().slice(0, 16) : '';
         document.getElementById("eventLocation").value = event ? event.extendedProps.location || '' : '';
         document.getElementById("eventColor").value = event ? event.backgroundColor : '#3788d8';
-        document.getElementById("eventRepeat").value = event ? event.extendedProps.repeat || 'none' : 'none';
-        document.getElementById("repeatUntil").value = event ? event.extendedProps.repeatUntil || '' : '';
-
-        var repeatOptions = document.getElementById('repeatOptions');
-        repeatOptions.style.display = document.getElementById("eventRepeat").value !== 'none' ? 'block' : 'none';
+        
 
         var participantSection = document.getElementById("participantSection");
         var eventForm = document.getElementById("eventForm");
         var eventDetails = document.getElementById("eventDetails");
         var participationButtons = document.getElementById("participationButtons");
+        var deleteButton = document.getElementById("deleteEventButton");
 
         if (event) {
             document.getElementById("detailDate").textContent = event.start.toLocaleDateString('ja-JP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -418,6 +415,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         modal.style.display = "block";
+
+        
+        if (event && {% if current_user.is_admin %}true{% else %}false{% endif %}) {
+            deleteButton.style.display = "inline-block";
+            deleteButton.onclick = function() {
+                if (confirm('このイベントを削除してもよろしいですか？')) {
+                    deleteEvent(event.id);
+                }
+            };
+        } else {
+            deleteButton.style.display = "none";
+        }
+
     }
 
     function updateEvent(event) {
@@ -428,8 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
             end: event.end.toISOString(),
             location: event.extendedProps.location,
             color: event.backgroundColor,
-            repeat: event.extendedProps.repeat,
-            repeatUntil: event.extendedProps.repeatUntil
         };
         axios.post('/event', eventData)
             .catch(function (error) {
@@ -437,6 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 calendar.refetchEvents();
             });
     }
+
+
 
     function fetchParticipants(eventId) {
         axios.get(`/event/${eventId}/participants`)
@@ -502,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('.participation-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
-
                 // クリックしたボタンに active クラスを追加
                 this.classList.add('active');
             });
@@ -527,30 +536,5 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("detailLocation").textContent = event.extendedProps.location || '未設定';
     }
 });
-
-// イベント削除機能
-function deleteEvent(eventId) {
-        axios.delete(`/event/${eventId}/delete`)
-            .then(function (response) {
-                calendar.refetchEvents();
-                modal.style.display = "none";
-            })
-            .catch(function (error) {
-                console.error('Error:', error);
-                alert('イベントの削除に失敗しました。');
-            });
-    }
-
-    // イベント削除ボタンの追加
-if (event) {
-        // 削除ボタンを表示
-        document.getElementById("deleteEventButton").style.display = "block";
-
-        // 削除ボタンにイベントリスナーを追加
-        document.getElementById("deleteEventButton").addEventListener('click', function() {
-            deleteEvent(event.id);
-        });
-    }
-
 </script>
 {% endblock %}

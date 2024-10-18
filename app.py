@@ -10,7 +10,7 @@ from flask_login import (
     current_user,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
 
 app = Flask(__name__)
@@ -46,8 +46,6 @@ class Event(db.Model):
     location = db.Column(db.String(255))
     color = db.Column(db.String(20), default="#3788d8")
     created_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    repeat = db.Column(db.String(20), default="none")
-    repeat_until = db.Column(db.Date)
 
     created_by_user = db.relationship("User", backref="events")
 
@@ -157,10 +155,6 @@ def get_events():
                 "end": event.end.isoformat(),
                 "color": event.color,
                 "location": event.location,
-                "repeat": event.repeat,
-                "repeatUntil": (
-                    event.repeat_until.isoformat() if event.repeat_until else None
-                ),
             }
             for event in events
         ]
@@ -184,10 +178,6 @@ def add_or_update_event():
     event.end = datetime.fromisoformat(event_data["end"])
     event.location = event_data.get("location", "")
     event.color = event_data.get("color", "#3788d8")
-    event.repeat = event_data.get("repeat", "none")
-    event.repeat_until = event_data.get("repeatUntil")
-    if event.repeat_until:
-        event.repeat_until = datetime.fromisoformat(event.repeat_until).date()
 
     if "id" in event_data:
         db.session.commit()
@@ -198,37 +188,26 @@ def add_or_update_event():
         return jsonify({"message": "Event created successfully"}), 201
 
 
-@app.route("/event/<int:id>", methods=["GET", "DELETE"])
+@app.route("/event/<int:id>/delete", methods=["DELETE"])
 @login_required
 @admin_required
-def get_or_delete_event(id):
+def delete_event(id):
     event = Event.query.get(id)
     if not event:
         return jsonify({"error": "Event not found"}), 404
 
-    if request.method == "GET":
-        return jsonify(
-            {
-                "id": event.id,
-                "title": event.title,
-                "start": event.start.isoformat(),
-                "end": event.end.isoformat(),
-                "location": event.location,
-                "color": event.color,
-                "repeat": event.repeat,
-                "repeatUntil": (
-                    event.repeat_until.isoformat() if event.repeat_until else None
-                ),
-                "participants_count": Participant.query.filter_by(
-                    event_id=event.id, status="参加"
-                ).count(),
-            }
-        )
-
-    elif request.method == "DELETE":
+    try:
+        # イベントに関連付けられた参加者を削除
+        for participant in event.participants:
+            db.session.delete(participant)
+        # イベントを削除
         db.session.delete(event)
         db.session.commit()
-        return "", 204
+        return jsonify({"message": "Event deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error deleting event: {str(e)}")
+        return jsonify({"error": "Failed to delete event"}), 500
 
 
 @app.route("/event/<int:id>/participants", methods=["GET", "POST"])
@@ -285,22 +264,6 @@ def delete_participant(id, participant_id):
         ),
         404,
     )
-
-
-@app.route("/event/<int:id>/delete", methods=["DELETE"])
-@login_required
-@admin_required
-def delete_event(id):
-    event = Event.query.get(id)
-    if event:
-        # イベントに関連付けられた参加者を削除
-        for participant in event.participants:
-            db.session.delete(participant)
-        # イベントを削除
-        db.session.delete(event)
-        db.session.commit()
-        return "", 204
-    return jsonify({"error": "Event not found"}), 404
 
 
 @app.route("/admin")
