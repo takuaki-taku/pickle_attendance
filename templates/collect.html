@@ -1,46 +1,86 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>集金</title>
-</head>
-<body>
-    <h1>{{ event.name }} - {{ event.date.strftime('%Y-%m-%d') }}</h1>
-    <form method="POST">
-        <table>
-            <thead>
-                <tr>
-                    <th>名前</th>
-                    <th>支払済み</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for participant in participants %}
-                <tr>
-                    <td>{{ participant.name }}</td>
-                    <td>
-                        <input type="checkbox" name="paid_{{ participant.id }}" {% if participant.paid %}checked{% endif %}>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h2>追加登録</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>名前</th>
-                    <th>支払済み</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="text" name="new_participant_name"></td>
-                    <td><input type="checkbox" name="new_participant_paid"></td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="submit">更新</button>
+{% extends "base.html" %}
+
+{% block title %}参加者集計{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">参加者集計</h1>
+    
+    <form class="mb-4" method="GET">
+        <div class="form-group">
+            <label for="date">日付を選択:</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">集計</button>
     </form>
-</body>
-</html>
+
+    {% if events %}
+        {% for event in events %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>{{ event.title }}</h2>
+                    <p>{{ event.start.strftime('%Y-%m-%d %H:%M') }} - {{ event.end.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                <div class="card-body">
+                    <h3>参加者 ({{ event.attending|length }})</h3>
+                    <ul>
+                        {% for participant in event.attending %}
+                            <li>{{ participant.username }} 
+                                <input type="checkbox" name="paid_{{ participant.id }}" {% if participant.paid %}checked{% endif %} class="custom-checkbox">
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3>不参加者 ({{ event.not_attending|length }})</h3>
+                    <ul>
+                        {% for participant in event.not_attending %}
+                            <li>{{ participant.username }} 
+                                <input type="checkbox" name="paid_{{ participant.id }}" {% if participant.paid %}checked{% endif %} class="custom-checkbox">
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3>未定者 ({{ event.undecided|length }})</h3>
+                    <ul>
+                        {% for participant in event.undecided %}
+                            <li>{{ participant.username }} 
+                                <input type="checkbox" name="paid_{{ participant.id }}" {% if participant.paid %}checked{% endif %} class="custom-checkbox">
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>選択された日付のイベントはありません。</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+<style>
+    .custom-checkbox {
+        width: 20px;
+        height: 20px;
+        background-color: #eee;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        appearance: none; /* ブラウザデフォルトのチェックボックスを隠す */
+    }
+
+    .custom-checkbox:checked {
+        background-color: #4CAF50;
+        border: 1px solid #4CAF50;
+    }
+
+    .custom-checkbox:checked::before {
+        content: "\f00c"; /* FontAwesome のチェックマーク */
+        font-family: FontAwesome;
+        color: white;
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+    }
+</style>

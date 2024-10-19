@@ -109,35 +109,42 @@
             border-radius: 5px;
         }
 
+        .kkpc {
+                display: none; 
+            }
+
         @media (max-width: 768px) {
-            .hamburger {
-                padding: 10px;
-                display: flex;
-                margin-left: auto; 
-            }
-
-            nav .container > div:not(.hamburger) {
-                display: none;
-            }
-
-            nav .container > div.active {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                right: 0;
-                left: auto;
-                text-align: right; 
-            }
-
-            nav .container {
-                flex-direction: column;
-                justify-content: flex-end; 
-            }
-
-            nav a {
-                margin-bottom: 10px;
-            }
+        .hamburger {
+            padding: 10px;
+            display: flex;
+            margin-left: auto; 
         }
+        
+
+        nav .container > div:not(.hamburger) {
+            display: none;
+        }
+
+        nav .container > div.active {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            right: 0;
+            left: auto;
+            text-align: right; 
+        }
+
+        nav .container {
+            flex-direction: column;
+            justify-content: flex-end; 
+        }
+
+        nav a {
+            margin-bottom: 10px;
+        }
+
+        
+    }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -146,6 +153,7 @@
         <div class="container">
             <div class="nav-left">
                 <a href="{{ url_for('index') }}" class="logo">Kyotanabe Pickleball Club</a>
+                <a href="{{ url_for('index') }}" class="kkpc">Kyoto KPC</a>
             </div>
 
             <div class="hamburger">
@@ -153,9 +161,10 @@
                 <span></span>
                 <span></span>
             </div>
-            <div>
+            <div class="nav-right">
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('index') }}">ホーム</a>
+                    <a href="{{ url_for('collect') }}">参加者集計</a>
                     {% if current_user.is_admin %}
                         <a href="{{ url_for('admin_panel') }}">管理者ページ</a>
                     {% endif %}

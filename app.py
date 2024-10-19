@@ -310,6 +310,26 @@ def delete_user(user_id):
     return redirect(url_for("admin_panel"))
 
 
+@app.route("/collect")
+@login_required
+def collect():
+    date_str = request.args.get("date")
+    if date_str:
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        events = Event.query.filter(db.func.date(Event.start) == date).all()
+
+        for event in events:
+            event.attending = [p.user for p in event.participants if p.status == "参加"]
+            event.not_attending = [
+                p.user for p in event.participants if p.status == "不参加"
+            ]
+            event.undecided = [p.user for p in event.participants if p.status == "未定"]
+
+        return render_template("collect.html", events=events, selected_date=date)
+
+    return render_template("collect.html", events=None, selected_date=None)
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
