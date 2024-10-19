@@ -276,6 +276,10 @@ document.addEventListener('DOMContentLoaded', function() {
             openModal(null, info.start, info.end);
             {% endif %}
         },
+        eventClick: function(info) {
+            openModal(info.event);
+        },
+        
         dateClick: function(info) {
             {% if current_user.is_admin %}
             openModal(null, info.date);
@@ -384,11 +388,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("modalTitle").textContent = event ? "イベントの詳細" : "イベントの追加";
         document.getElementById("eventId").value = event ? event.id : '';
         document.getElementById("eventTitle").value = event ? event.title : '';
-        // 当日の9時と12時を初期値に設定
-        start.setHours(18, 0, 0, 0);
-        document.getElementById("eventStart").value = event ? event.start.toISOString().slice(0, 16) : start.toISOString().slice(0, 16);
-        end.setHours(-3, 0, 0, 0);
-        document.getElementById("eventEnd").value = event ? event.end.toISOString().slice(0, 16) : end.toISOString().slice(0, 16);
+        document.getElementById("eventStart").value = event ? event.start.toISOString().slice(0, 16) : '';
+        document.getElementById("eventEnd").value = event ? event.end.toISOString().slice(0, 16) : '';
         document.getElementById("eventLocation").value = event ? event.extendedProps.location || '' : '';
         document.getElementById("eventColor").value = event ? event.backgroundColor : '#3788d8';
         document.getElementById("eventLocation").value = event ? event.extendedProps.location || '' : '';
@@ -415,6 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
             eventForm.style.display = "none";
             {% endif %}
         } else {
+            // 当日の9時と12時を初期値に設定
+            start.setHours(18, 0, 0, 0);
+            end = new Date(start); // start と同じ日付で初期化
+            end.setHours(-3, 0, 0, 0); // 時間を午前3時に設定
+            document.getElementById("eventStart").value = start.toISOString().slice(0, 16);
+            document.getElementById("eventEnd").value = end.toISOString().slice(0, 16);
             document.getElementById("eventDetails").style.display = "none";
             participationButtons.style.display = "none";
             eventForm.style.display = "block";
