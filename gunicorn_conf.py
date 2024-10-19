@@ -15,8 +15,3 @@ proc_name = "event_manager"
 
 # デーモン化の設定
 daemon = False
-
-# ログの設定
-loglevel = "info"
-accesslog = "./gunicorn-access.log"
-errorlog = "./gunicorn-error.log"
