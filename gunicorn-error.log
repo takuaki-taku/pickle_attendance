@@ -1,0 +1,28 @@
+[2024-10-19 18:48:05 +0900] [42998] [INFO] Starting gunicorn 20.1.0
+[2024-10-19 18:48:05 +0900] [42998] [INFO] Listening at: http://0.0.0.0:8000 (42998)
+[2024-10-19 18:48:05 +0900] [42998] [INFO] Using worker: sync
+[2024-10-19 18:48:05 +0900] [43000] [INFO] Booting worker with pid: 43000
+[2024-10-19 18:48:05 +0900] [43001] [INFO] Booting worker with pid: 43001
+[2024-10-19 18:48:05 +0900] [43002] [INFO] Booting worker with pid: 43002
+[2024-10-19 18:48:05 +0900] [43003] [INFO] Booting worker with pid: 43003
+[2024-10-19 18:48:05 +0900] [43004] [INFO] Booting worker with pid: 43004
+[2024-10-19 18:48:05 +0900] [43005] [INFO] Booting worker with pid: 43005
+[2024-10-19 18:48:05 +0900] [43006] [INFO] Booting worker with pid: 43006
+[2024-10-19 18:48:05 +0900] [43007] [INFO] Booting worker with pid: 43007
+[2024-10-19 18:48:05 +0900] [43008] [INFO] Booting worker with pid: 43008
+[2024-10-19 18:48:05 +0900] [43009] [INFO] Booting worker with pid: 43009
+[2024-10-19 18:48:05 +0900] [43010] [INFO] Booting worker with pid: 43010
+[2024-10-19 18:48:05 +0900] [43011] [INFO] Booting worker with pid: 43011
+[2024-10-19 18:48:06 +0900] [43013] [INFO] Booting worker with pid: 43013
+[2024-10-19 18:48:06 +0900] [43015] [INFO] Booting worker with pid: 43015
+[2024-10-19 18:48:06 +0900] [43016] [INFO] Booting worker with pid: 43016
+[2024-10-19 18:48:06 +0900] [43017] [INFO] Booting worker with pid: 43017
+[2024-10-19 18:48:06 +0900] [43018] [INFO] Booting worker with pid: 43018
+[2024-10-19 18:48:06 +0900] [43019] [INFO] Booting worker with pid: 43019
+[2024-10-19 18:48:06 +0900] [43020] [INFO] Booting worker with pid: 43020
+[2024-10-19 18:48:06 +0900] [43021] [INFO] Booting worker with pid: 43021
+[2024-10-19 18:48:06 +0900] [43025] [INFO] Booting worker with pid: 43025
+[2024-10-19 18:48:06 +0900] [43027] [INFO] Booting worker with pid: 43027
+[2024-10-19 18:48:06 +0900] [43031] [INFO] Booting worker with pid: 43031
+[2024-10-19 18:48:06 +0900] [43032] [INFO] Booting worker with pid: 43032
+[2024-10-19 18:48:06 +0900] [43033] [INFO] Booting worker with pid: 43033
