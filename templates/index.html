@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // 当日の9時と12時を初期値に設定
             start.setHours(18, 0, 0, 0);
             end = new Date(start); // start と同じ日付で初期化
-            end.setHours(-3, 0, 0, 0); // 時間を午前3時に設定
+            end.setHours(21, 0, 0, 0); // 時間を午前3時に設定
             document.getElementById("eventStart").value = start.toISOString().slice(0, 16);
             document.getElementById("eventEnd").value = end.toISOString().slice(0, 16);
             document.getElementById("eventDetails").style.display = "none";
