@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}イベント一括作成{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一括イベント作成</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        form {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .instructions {
+            margin-top: 30px;
+            background-color: #e9f7fe;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>一括イベント作成</h1>
+    <form id="bulkCreateForm">
+        <div>
+            <label for="events">イベント情報（1行に1イベント）:</label>
+            <textarea id="events" name="events" required></textarea>
+            <p>形式: 日付,タイトル,開始時間,終了時間,場所,色<br>
+               例: 2023-06-01,ピックルボール練習,18:00,20:00,市民体育館,#3788d8</p>
+        </div>
+        <button type="submit">イベントを一括作成</button>
+    </form>
+    <div id="message" class="message" style="display: none;"></div>
+
+    <div class="instructions">
+        <h2>使い方</h2>
+        <ol>
+            <li>テキストエリアに各イベントの情報を1行ずつ入力します。</li>
+            <li>各行は「日付,タイトル,開始時間,終了時間,場所,色」の順で情報を入力してください。</li>
+            <li>色は16進数カラーコード（例: #3788d8）を使用してください。</li>
+            <li>全てのイベント情報を入力したら、「イベントを一括作成」ボタンをクリックします。</li>
+            <li>作成が成功すると、成功メッセージが表示されます。</li>
+        </ol>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.getElementById('bulkCreateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const events = document.getElementById('events').value;
+            const messageElement = document.getElementById('message');
+            
+            axios.post('/admin/bulk_create_events', { events: events })
+                .then(function (response) {
+                    messageElement.textContent = 'イベントが正常に作成されました。';
+                    messageElement.className = 'message success';
+                    messageElement.style.display = 'block';
+                    document.getElementById('events').value = '';
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                    messageElement.textContent = 'イベントの作成に失敗しました。';
+                    messageElement.className = 'message error';
+                    messageElement.style.display = 'block';
+                });
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}
