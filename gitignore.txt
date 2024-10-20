@@ -194,3 +194,7 @@ cython_debug/
 
 
 
+# Other
+.DS_Store
+.env
+.venv
