@@ -122,7 +122,7 @@
                 })
                 .catch(function (error) {
                     console.error('Error:', error);
-                    messageElement.textContent = 'イベントの作成に失敗しました。';
+                    messageElement.textContent = 'イベントの作成に失敗しました。' + (error.response ? error.response.data.error : '');
                     messageElement.className = 'message error';
                     messageElement.style.display = 'block';
                 });

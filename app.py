@@ -335,28 +335,33 @@ def collect():
 @admin_required
 def bulk_create_events():
     if request.method == "POST":
-        events_data = request.form.get("events").split("\n")
-        events = []
-        for event_line in events_data:
-            if event_line.strip():  # 空行をスキップ
-                date, title, start_time, end_time, location, color = (
-                    event_line.strip().split(",")
-                )
-                start = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-                end = datetime.strptime(f"{date} {end_time}", "%Y-%m-%d %H:%M")
-                event = Event(
-                    title=title,
-                    start=start,
-                    end=end,
-                    location=location,
-                    color=color,
-                    created_by=current_user.id,
-                )
-                events.append(event)
+        try:
+            events_data = request.json.get("events").split("\n")
+            events = []
+            for event_line in events_data:
+                if event_line.strip():  # 空行をスキップ
+                    date, title, start_time, end_time, location, color = (
+                        event_line.strip().split(",")
+                    )
+                    start = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+                    end = datetime.strptime(f"{date} {end_time}", "%Y-%m-%d %H:%M")
+                    event = Event(
+                        title=title,
+                        start=start,
+                        end=end,
+                        location=location,
+                        color=color,
+                        created_by=current_user.id,
+                    )
+                    events.append(event)
 
-        db.session.bulk_save_objects(events)
-        db.session.commit()
+            db.session.bulk_save_objects(events)
+            db.session.commit()
 
-        return jsonify({"message": "Events created successfully"}), 201
+            return jsonify({"message": "Events created successfully"}), 201
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating events: {str(e)}")
+            return jsonify({"error": str(e)}), 400
 
     return render_template("bulk_create_events.html")
