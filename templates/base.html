@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>イベント管理 - {% block title %}{% endblock %}</title>
+    <title>Kyoto Kyotanabe Pickleball Club - {% block title %}{% endblock %}</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -114,37 +114,48 @@
             }
 
         @media (max-width: 768px) {
-        .hamburger {
-            padding: 10px;
-            display: flex;
-            margin-left: auto; 
-        }
-        
+            .hamburger {
+                padding: 10px;
+                display: flex;
+                margin-left: auto; 
+            }
 
-        nav .container > div:not(.hamburger) {
-            display: none;
-        }
+            nav .container > div:not(.hamburger) {
+                display: none;
+            }
 
-        nav .container > div.active {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            right: 0;
-            left: auto;
-            text-align: right; 
-        }
+            nav .container > div.active {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                right: 0;
+                left: auto;
+                text-align: right; 
+            }
 
-        nav .container {
-            flex-direction: column;
-            justify-content: flex-end; 
-        }
+            nav .container {
+                flex-direction: column;
+                justify-content: flex-end; 
+            }
 
-        nav a {
-            margin-bottom: 10px;
-        }
 
-        
-    }
+            nav a {
+                margin-bottom: 10px;
+                margin-left:auto
+            }
+
+            .nav-right {
+            justify-content: flex-end; /* 右寄せ */
+            }
+
+            .logo {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 auto; /* 追加 */
+            display: block; /* 追加 */
+            width: fit-content; /* 追加 */
+            
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>

@@ -4,6 +4,9 @@
 
 {% block content %}
 <h1>管理者ページ</h1>
+<h2>イベント管理</h2>
+<a href="{{ url_for('bulk_create_events') }}">一括イベント作成</a>
+
 <h2>ユーザー管理</h2>
 <table>
     <thead>
@@ -36,4 +39,5 @@
         {% endfor %}
     </tbody>
 </table>
+
 {% endblock %}

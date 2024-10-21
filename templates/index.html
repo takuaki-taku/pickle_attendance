@@ -118,10 +118,42 @@
         color: #333;
     }
     @media (max-width: 768px) {
-        h1 {
-            font-size: 2em;
+        .modal-content {
+            width: 95%;
+            margin: 5% auto;
+            padding: 15px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #eventForm input, #eventForm select {
+            font-size: 16px; /* モバイルでのズームを防ぐ */
+        }
+
+        .event-details, .participation-status {
+            padding: 10px;
+        }
+
+        .event-info {
+            grid-template-columns: 1fr;
+        }
+
+        .participation-btn {
+            padding: 8px 12px;
+            font-size: 14px;
         }
     }
+
+    /* イベントモーダルのスタイル */
+    @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 15px;
+                max-height: 90vh;
+            }
+        }
+        
     @media (max-width: 480px) {
         h1 {
             font-size: 1.8em;
@@ -343,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-            // イベント削除機能
+// イベント削除機能
     function deleteEvent(eventId) {
         axios.delete(`/event/${eventId}/delete`)
             .then(function (response) {
@@ -385,6 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function openModal(event, start, end) {
+        
         document.getElementById("modalTitle").textContent = event ? "イベントの詳細" : "イベントの追加";
         document.getElementById("eventId").value = event ? event.id : '';
         document.getElementById("eventTitle").value = event ? event.title : '';
@@ -395,6 +428,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("eventLocation").value = event ? event.extendedProps.location || '' : '';
         document.getElementById("eventColor").value = event ? event.backgroundColor : '#3788d8';
 
+        // モバイルでのスクロール位置をリセット
+        if (window.innerWidth <= 768) {
+        document.querySelector('.modal-content').scrollTop = 0;
+        }
         var participantSection = document.getElementById("participantSection");
         var eventForm = document.getElementById("eventForm");
         var eventDetails = document.getElementById("eventDetails");
