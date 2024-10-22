@@ -32,8 +32,6 @@
             padding: 20px;
         }
 
-      
-
         nav {
             background-color: var(--primary-color);
             padding: 10px 0;
@@ -90,11 +88,6 @@
             color: white;
         }
 
-        h1, h2, h3 {
-            color: var(--primary-color);
-        }
-
-        
         .hamburger {
             display: none;
             flex-direction: column;
@@ -110,51 +103,53 @@
         }
 
         .kkpc {
-                display: none; 
-            }
+            display: none; 
+        }
 
         @media (max-width: 768px) {
+            nav {
+                padding: 5px 0;
+            }
+
             .hamburger {
-                padding: 10px;
                 display: flex;
-                margin-left: auto; 
+                padding: 10px;
+                margin-left: auto;
+            }
+
+            nav .container {
+                flex-direction: column;
+                align-items: flex-end;
             }
 
             nav .container > div:not(.hamburger) {
                 display: none;
+                width: 100%;
             }
 
             nav .container > div.active {
                 display: flex;
                 flex-direction: column;
-                width: 100%;
-                right: 0;
-                left: auto;
-                text-align: right; 
+                align-items: flex-end;
             }
-
-            nav .container {
-                flex-direction: column;
-                justify-content: flex-end; 
-            }
-
 
             nav a {
                 margin-bottom: 10px;
-                margin-left:auto
-            }
-
-            .nav-right {
-            justify-content: flex-end; /* 右寄せ */
             }
 
             .logo {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin: 0 auto; /* 追加 */
-            display: block; /* 追加 */
-            width: fit-content; /* 追加 */
-            
+                margin: 0 auto;
+                display: block;
+                width: fit-content;
+            }
+
+            .kkpc {
+                display: inline;
+            }
+
+            .logo:not(.kkpc) {
+                display: none;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -188,7 +183,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container" style="min-height: calc(100vh - 100px);">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flash-messages">

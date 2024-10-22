@@ -15,7 +15,10 @@ from datetime import datetime
 from functools import wraps
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///events.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL",
+    "postgresql://event_manager_user:KyotanabePickle@localhost/event_manager",
+)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "fallback_secret_key"
 
 db = SQLAlchemy(app)
@@ -27,7 +30,7 @@ login_manager.login_view = "login"
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))  # カラムのサイズを256に変更
     is_admin = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
