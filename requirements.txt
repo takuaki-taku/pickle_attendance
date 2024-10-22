@@ -7,3 +7,5 @@ SQLAlchemy==2.0.35
 Werkzeug==3.0.4
 Gunicorn
 psycopg2-binary
+python-dotenv
+
