@@ -15,15 +15,14 @@ from datetime import datetime
 from functools import wraps
 
 app = Flask(__name__)
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    # Renderは'postgres://'で始まるURLを提供しますが、
-    # SQLAlchemyは'postgresql://'を期待します
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    database_url or "postgresql://username:password@localhost/dbname"
+# データベース接続設定
+database_url = os.environ.get(
+    "DATABASE_URL",
+    "postgresql://event_manager_user:KyotanabePickle@localhost/event_manager",
 )
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# シークレットキーの設定
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "fallback_secret_key"
 
 db = SQLAlchemy(app)
