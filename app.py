@@ -13,17 +13,21 @@ from flask_login import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from functools import wraps
+from dotenv import load_dotenv  # 環境変数を読み込むためのライブラリ
+
+load_dotenv()  # 環境変数をロード
 
 app = Flask(__name__)
 # データベース接続設定
-database_url = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://event_manager_user:KyotanabePickle@localhost/event_manager",
-)
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+# database_url = os.environ.get(
+#     "postgresql://event_manager_user:tbc1LEzQW9HzLmP6k6aejqliIyjQEROw@dpg-csbib5dds78s73b80iu0-a.frankfurt-postgres.render.com/event_manager_kbm4"
+# )
+# app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # シークレットキーの設定
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "fallback_secret_key"
+
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)  # Migrate オブジェクトを作成
